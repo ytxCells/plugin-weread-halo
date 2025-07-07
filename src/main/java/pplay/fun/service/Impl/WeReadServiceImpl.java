@@ -25,16 +25,16 @@ public class WeReadServiceImpl implements WeReadService {
             JsonNode notebooks = weReadApiClient.getNotebooks();
             // 后续可添加其他 API 调用逻辑
             //获取阅读状态信息
-            JsonNode readingInfo = weReadApiClient.getReadingInfo("932426");
+            JsonNode readingInfo = weReadApiClient.getReadingInfo("3300096645");
             //获取书籍章节信息
-            JsonNode chapterInfos = weReadApiClient.getChapterInfos("932426");
+            JsonNode chapterInfos = weReadApiClient.getChapterInfos("3300096645");
             //书籍详情
-            JsonNode bookInfo = weReadApiClient.getBookInfo("34631845");
-            JsonNode webBookInfo = weReadApiClient.getWebBookInfo("34631845");
+            JsonNode bookInfo = weReadApiClient.getBookInfo("3300096645");
+            JsonNode webBookInfo = weReadApiClient.getWebBookInfo("3300096645");
             //划线
-            JsonNode bookmarks = weReadApiClient.getBookmarks("34631845");
+            JsonNode bookmarks = weReadApiClient.getBookmarks("3300096645");
             //笔记
-            JsonNode personalReviews = weReadApiClient.getPersonalReviews("34631845");
+            JsonNode personalReviews = weReadApiClient.getPersonalReviews("3300096645");
 
             System.out.println(111);
         } catch (Exception e) {

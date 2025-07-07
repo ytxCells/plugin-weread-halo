@@ -18,6 +18,10 @@ import org.springframework.stereotype.Component;
 import pplay.fun.model.WeReadConfig;
 import pplay.fun.service.WeReadConfigService;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -133,6 +137,11 @@ public class WeReadApiClient {
 
     // 处理错误响应
     private boolean handleErrorResponse(JsonNode responseNode, String operation) throws Exception {
+        //检查空响应
+        if (responseNode == null || responseNode.isNull()) {
+            log.error("{} 返回空响应", operation);
+            return true;
+        }
         if (responseNode.has("errcode")) {
             int errcode = responseNode.get("errcode").asInt();
 
@@ -144,6 +153,14 @@ public class WeReadApiClient {
 
             log.error("{} failed with error code: {}", operation, errcode);
             throw new Exception(operation + " failed with error code: " + errcode);
+        }
+        if (responseNode.has("status")) {
+            int status = responseNode.get("status").asInt();
+            if (status >= 400) {
+                log.warn("API 返回 {} 错误，尝试刷新 Cookie", status);
+                refreshCookie();
+                return true;
+            }
         }
         return false;
     }
@@ -206,12 +223,29 @@ public class WeReadApiClient {
      * 7. 获取划线记录 (带重试机制)
      */
     public JsonNode getBookmarks(String bookId) throws Exception {
-
-        return executeWithRetry(()->{
+        return executeWithRetry(() -> {
             String url = BASE_URL + "/web/book/bookmarklist?bookId=" + bookId;
-            return executeGetRequest(url);
+            // 创建自定义请求执行器
+            return executeGetRequestWithSpecificReferer(url, "https://weread.qq.com/web/reader/" + bookId);
         }, "getBookmarks");
     }
+
+    // 新增专用请求方法
+    private JsonNode executeGetRequestWithSpecificReferer(String url, String referer) throws Exception {
+        checkCookie();
+        HttpGet request = new HttpGet(url);
+        // 设置通用头
+        request.setHeader("Cookie", cookie);
+        request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
+        // 关键：设置书籍专属 Referer
+        request.setHeader("Referer", referer);
+
+        HttpResponse response = httpClient.execute(request);
+        String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        log.info("BOOKMARK API 响应: {}", responseBody); // 详细日志
+        return objectMapper.readTree(responseBody);
+    }
+
 
     /**
      * 8. 获取个人笔记 (带重试机制)
@@ -311,65 +345,4 @@ public class WeReadApiClient {
         message.setHeader("Referer", "https://weread.qq.com/");
     }
 
-    public static void main(String[] args) {
-        // 从环境变量获取Cookie
-        String cookie = "";
-        if (cookie == null || cookie.isEmpty()) {
-            System.err.println("请设置环境变量 WEREAD_COOKIE");
-            return;
-        }
-
-        WeReadApiClient client = new WeReadApiClient(cookie);
-
-        try {
-            // 1. 获取用户书架
-            JsonNode bookshelf = client.getBookshelf();
-            int bookCount = bookshelf.get("bookCount").asInt();
-            System.out.println("书架书籍数量: " + bookCount);
-
-            // 2. 获取有笔记的书籍
-            JsonNode notebooks = client.getNotebooks();
-            int notebookCount = notebooks.get("books").size();
-            System.out.println("有笔记的书籍数量: " + notebookCount);
-
-            // 3. 测试书籍ID（《读透王阳明：心学教你内心强大的智慧》）
-            String testBookId = "821337";
-
-            // 4. 获取书籍详情
-            JsonNode bookInfo = client.getBookInfo(testBookId);
-            System.out.println("书籍标题: " + bookInfo.get("title").asText());
-
-            // 5. 获取章节信息
-            JsonNode chapters = client.getChapterInfos(testBookId);
-            JsonNode chapterList = chapters.get("data").get(0).get("updated");
-            System.out.println("章节数量: " + chapterList.size());
-
-            // 6. 获取阅读状态
-            JsonNode readingInfo = client.getReadingInfo(testBookId);
-            int progress = readingInfo.get("book").get("progress").asInt();
-            System.out.println("阅读进度: " + progress + "%");
-
-            // 7. 获取热门评论
-            JsonNode bestReviews = client.getBestReviews(testBookId, 3);
-            System.out.println("热门评论数量: " + bestReviews.get("reviews").size());
-
-            // 8. 尝试获取划线记录
-            try {
-                JsonNode bookmarks = client.getBookmarks(testBookId);
-                if (bookmarks.has("updated")) {
-                    System.out.println("划线数量: " + bookmarks.get("updated").size());
-                } else if (bookmarks.has("errcode")) {
-                    System.out.println("获取划线失败，错误码: " + bookmarks.get("errcode").asInt());
-                }
-            } catch (Exception e) {
-                System.out.println("获取划线记录异常: " + e.getMessage());
-            }
-
-
-
-        } catch (Exception e) {
-            System.err.println("API调用失败: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 }
