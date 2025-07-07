@@ -168,7 +168,9 @@ public class WeReadApiClient {
     public JsonNode getBookInfo(String bookId) throws Exception {
         return executeWithRetry(() -> executeGetRequest(BASE_URL + "/api/book/info?bookId=" + bookId), "getBookInfo");
     }
-
+    public JsonNode getWebBookInfo(String bookId) throws Exception {
+        return executeWithRetry(() -> executeGetRequest(BASE_URL + "/web/book/info?bookId=" + bookId), "getBookInfo");
+    }
     /**
      * 4. 获取书籍章节信息 (带重试机制)
      */
@@ -204,7 +206,11 @@ public class WeReadApiClient {
      * 7. 获取划线记录 (带重试机制)
      */
     public JsonNode getBookmarks(String bookId) throws Exception {
-        return executeWithRetry(() -> executeGetRequest(BASE_URL + "/web/book/bookmarklist?bookId=" + bookId), "getBookmarks");
+
+        return executeWithRetry(()->{
+            String url = BASE_URL + "/web/book/bookmarklist?bookId=" + bookId;
+            return executeGetRequest(url);
+        }, "getBookmarks");
     }
 
     /**
@@ -212,7 +218,7 @@ public class WeReadApiClient {
      */
     public JsonNode getPersonalReviews(String bookId) throws Exception {
         return executeWithRetry(() -> {
-            String url = I_BASE_URL + "/review/list?bookId=" + bookId +
+            String url = BASE_URL + "/web/review/list?bookId=" + bookId +
                 "&listType=11&mine=1&synckey=0";
             return executeGetRequest(url);
         }, "getPersonalReviews");
@@ -267,6 +273,7 @@ public class WeReadApiClient {
 
         HttpResponse response = httpClient.execute(request);
         String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        log.debug("API响应: URL={}, Body={}", url, responseBody); // 新增日志
         JsonNode result = objectMapper.readTree(responseBody);
 
         // 检查 HTTP 状态码
@@ -358,17 +365,7 @@ public class WeReadApiClient {
                 System.out.println("获取划线记录异常: " + e.getMessage());
             }
 
-            // 9. 尝试获取个人笔记
-            try {
-                JsonNode personalReviews = client.getPersonalReviews(testBookId);
-                if (personalReviews.has("reviews")) {
-                    System.out.println("个人笔记数量: " + personalReviews.get("reviews").size());
-                } else if (personalReviews.has("errcode")) {
-                    System.out.println("获取个人笔记失败，错误码: " + personalReviews.get("errcode").asInt());
-                }
-            } catch (Exception e) {
-                System.out.println("获取个人笔记异常: " + e.getMessage());
-            }
+
 
         } catch (Exception e) {
             System.err.println("API调用失败: " + e.getMessage());

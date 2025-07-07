@@ -22,8 +22,21 @@ public class WeReadServiceImpl implements WeReadService {
             } else {
                 log.warn("无法获取书籍数量，bookshelf 为 null 或缺少 'bookCount' 字段");
             }
-
+            JsonNode notebooks = weReadApiClient.getNotebooks();
             // 后续可添加其他 API 调用逻辑
+            //获取阅读状态信息
+            JsonNode readingInfo = weReadApiClient.getReadingInfo("932426");
+            //获取书籍章节信息
+            JsonNode chapterInfos = weReadApiClient.getChapterInfos("932426");
+            //书籍详情
+            JsonNode bookInfo = weReadApiClient.getBookInfo("34631845");
+            JsonNode webBookInfo = weReadApiClient.getWebBookInfo("34631845");
+            //划线
+            JsonNode bookmarks = weReadApiClient.getBookmarks("34631845");
+            //笔记
+            JsonNode personalReviews = weReadApiClient.getPersonalReviews("34631845");
+
+            System.out.println(111);
         } catch (Exception e) {
             log.error("同步微信读书数据失败", e);
         }

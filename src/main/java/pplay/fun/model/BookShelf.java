@@ -2,10 +2,8 @@ package pplay.fun.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import run.halo.app.extension.AbstractExtension;
 import run.halo.app.extension.GVK;
-import java.time.Instant;
 import java.util.List;
 
 @GVK(group = "weread.pplay.fun",
@@ -20,20 +18,70 @@ public class BookShelf extends AbstractExtension {
     public static class BookShelfSpec {
         @Schema(description = "用户ID", required = true)
         private String userId;
-
-        @Schema(description = "书籍项列表")
-        private List<ShelfItem> items;
+        private Integer synckey;
+        @Schema(description = "书籍数量（包含导入书籍）")
+        private int pureBookCount;
+        @Schema(description = "书籍数量")
+        private int bookCount;
+        @Schema(description = "书籍进度")
+        private List<BookProgress> bookProgress;
+        @Schema(description = "分组")
+        private List<Archive> archive;
+        @Schema(description = "书籍列表")
+        private List<Book> books;
+        @Schema(description = "微信公众号")
+        private Mp mp;
     }
 
     @Data
-    public static class ShelfItem {
-        @Schema(description = "关联书籍ID", required = true)
-        private String bookName; // 指向 WeReadBook 的 metadata.name
+    public static class  Book{
+        private String bookId;
+        private String title;
+        private String author;
+        private String cover;
+        private Integer version;
+        private String format;
+        private Integer type;
+        private Integer price;
+        private Integer originalPrice;
+        private Integer bookStatus;
+        private Integer payingStatus;
+        private String category;
+        private List<Category> categories;
 
-        @Schema(description = "阅读状态: READING/FINISHED/PLAN_TO_READ")
-        private String status;
+    }
+    @Data
+    public static class BookProgress{
+        private String bookId;
+        private Integer progress;
 
-        @Schema(description = "添加到书架的时间")
-        private Instant addTime;
+        private Integer chapterUid;
+        private Integer chapterOffset;
+
+        private Integer chapterIdx;
+        private String appid;
+        private String updateTime;
+        private String readingTime;
+
+        private String synckey;
+
+    }
+    @Data
+    public static class Archive{
+        private Integer archiveId;
+        private String name;
+        private List<String> bookIds;
+    }
+    @Data
+    public static class Category{
+        private Integer categoryId;
+        private Integer subCategoryId;
+        private Integer categoryType;
+        private String title;
+    }
+    @Data
+    public static class Mp{
+        private Integer show;
+        private Book book;
     }
 }
