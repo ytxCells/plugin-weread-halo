@@ -2,7 +2,10 @@ package pplay.fun;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pplay.fun.model.Bookmark;
+import pplay.fun.model.Review;
 import pplay.fun.model.WeReadConfig;
+import pplay.fun.model.WeReadProgress;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
 import run.halo.app.plugin.PluginContext;
@@ -28,7 +31,9 @@ public class WereadHaloPlugin extends BasePlugin {
     @Override
     public void start() {
         schemeManager.register(WeReadConfig.class);
-
+        schemeManager.register(Bookmark.class);
+        schemeManager.register(WeReadProgress.class);
+        schemeManager.register(Review.class);
         System.out.println("插件启动成功！");
     }
 

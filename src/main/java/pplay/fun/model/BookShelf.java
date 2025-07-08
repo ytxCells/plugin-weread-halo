@@ -18,7 +18,7 @@ public class BookShelf extends AbstractExtension {
     public static class BookShelfSpec {
         @Schema(description = "用户ID", required = true)
         private String userId;
-        private Integer synckey;
+        private Long synckey;
         @Schema(description = "书籍数量（包含导入书籍）")
         private int pureBookCount;
         @Schema(description = "书籍数量")
@@ -63,7 +63,7 @@ public class BookShelf extends AbstractExtension {
         private String updateTime;
         private String readingTime;
 
-        private String synckey;
+        private Long synckey;
 
     }
     @Data
