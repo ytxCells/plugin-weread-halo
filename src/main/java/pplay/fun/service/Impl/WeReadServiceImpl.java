@@ -1,16 +1,31 @@
 package pplay.fun.service.Impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
+import pplay.fun.model.BookShelf;
+import pplay.fun.service.BookShelfService;
+import pplay.fun.service.BookmarkService;
+import pplay.fun.service.ReviewService;
+import pplay.fun.service.WeReadProgressService;
 import pplay.fun.service.WeReadService;
 import pplay.fun.component.WeReadApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import run.halo.app.extension.ReactiveExtensionClient;
 
 @Slf4j
 @Service
 public class WeReadServiceImpl implements WeReadService {
     @Resource
     private WeReadApiClient weReadApiClient;
+    @Resource
+    private BookmarkService bookmarkService;
+    @Resource
+    private BookShelfService bookShelfService;
+    @Resource
+    private ReviewService reviewService;
+    @Resource
+    private WeReadProgressService progressService;
     @Override
     public void synchronizationWeRead(){
         try {
@@ -35,7 +50,6 @@ public class WeReadServiceImpl implements WeReadService {
             JsonNode bookmarks = weReadApiClient.getBookmarks("3300096645");
             //笔记
             JsonNode personalReviews = weReadApiClient.getPersonalReviews("3300096645");
-
             System.out.println(111);
         } catch (Exception e) {
             log.error("同步微信读书数据失败", e);
