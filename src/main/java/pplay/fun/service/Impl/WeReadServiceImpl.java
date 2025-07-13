@@ -1,9 +1,11 @@
 package pplay.fun.service.Impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
-import pplay.fun.model.BookShelf;
-import pplay.fun.service.BookShelfService;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import pplay.fun.service.BookshelfService;
 import pplay.fun.service.BookmarkService;
 import pplay.fun.service.ReviewService;
 import pplay.fun.service.WeReadProgressService;
@@ -11,7 +13,7 @@ import pplay.fun.service.WeReadService;
 import pplay.fun.component.WeReadApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import run.halo.app.extension.ReactiveExtensionClient;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -21,41 +23,52 @@ public class WeReadServiceImpl implements WeReadService {
     @Resource
     private BookmarkService bookmarkService;
     @Resource
-    private BookShelfService bookShelfService;
+    private BookshelfService bookShelfService;
     @Resource
     private ReviewService reviewService;
     @Resource
     private WeReadProgressService progressService;
     @Override
-    public void synchronizationWeRead(){
-        try {
-            // 示例：调用 API 方法
-            JsonNode bookshelf = weReadApiClient.getBookshelf();
-            if (bookshelf != null && bookshelf.has("bookCount")) {
-                int bookCount = bookshelf.get("bookCount").asInt();
-                log.info("书架书籍数量: {}", bookCount);
-            } else {
-                log.warn("无法获取书籍数量，bookshelf 为 null 或缺少 'bookCount' 字段");
-            }
-            JsonNode notebooks = weReadApiClient.getNotebooks();
-            // 后续可添加其他 API 调用逻辑
-            //获取阅读状态信息
-            JsonNode readingInfo = weReadApiClient.getReadingInfo("3300096645");
-            //获取书籍章节信息
-            JsonNode chapterInfos = weReadApiClient.getChapterInfos("3300096645");
-            //书籍详情
-            JsonNode bookInfo = weReadApiClient.getBookInfo("3300096645");
-            JsonNode webBookInfo = weReadApiClient.getWebBookInfo("3300096645");
-            //划线
-            JsonNode bookmarks = weReadApiClient.getBookmarks("3300096645");
-            //笔记
-            JsonNode personalReviews = weReadApiClient.getPersonalReviews("3300096645");
-            System.out.println(111);
-        } catch (Exception e) {
-            log.error("同步微信读书数据失败", e);
-        }
-    }
-    public void addWeRead(String cookie){
+    public Mono<Void> synchronizationWeRead() {
+        return ReactiveSecurityContextHolder.getContext() // 替换为官方API
+            .switchIfEmpty(Mono.error(new AuthenticationCredentialsNotFoundException("安全上下文为空")))
+            .flatMap(securityContext -> {
+                Authentication auth = securityContext.getAuthentication();
+                if (auth == null || !auth.isAuthenticated()) {
+                    return Mono.error(new AuthenticationCredentialsNotFoundException("用户未认证"));
+                }
+                String username = auth.getName();
+                log.info("开始同步用户数据: {}", username);
 
+                return Mono.fromCallable(weReadApiClient::getBookshelf)
+                    .flatMap(bookShelfService::save)
+                    .then(Mono.fromCallable(weReadApiClient::getNotebooks))
+                    .then();
+            });
     }
-}
+
+
+
+//     @Override
+//     public Mono<Void> synchronizationWeRead(){
+//         return Mono.fromRunnable(() -> {
+//             try {
+//                 JsonNode bookshelf = weReadApiClient.getBookshelf();
+//                 bookShelfService.save(bookshelf);
+//                 JsonNode notebooks = weReadApiClient.getNotebooks();
+//
+//                 // 示例调用（后续需替换硬编码ID）
+//                 String sampleBookId = "3300096645";
+//                 weReadApiClient.getReadingInfo(sampleBookId);
+//                 weReadApiClient.getChapterInfos(sampleBookId);
+//                 weReadApiClient.getBookInfo(sampleBookId);
+//                 weReadApiClient.getWebBookInfo(sampleBookId);
+//                 weReadApiClient.getBookmarks(sampleBookId);
+//                 weReadApiClient.getPersonalReviews(sampleBookId);
+//             } catch (Exception e) {
+//                 log.error("同步微信读书数据失败", e);
+//                 throw new RuntimeException(e); // 转换为非受检异常
+//             }
+//         }).then();
+//     }
+ }
