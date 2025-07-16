@@ -40,6 +40,9 @@ pnpm dev
 
 构建完成后，可以在 `build/libs` 目录找到插件 jar 文件。
 
+## 贡献
+
+
 ## 许可证
 
 [GPL-3.0](./LICENSE) © ytxCells 

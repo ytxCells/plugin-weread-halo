@@ -11,7 +11,7 @@ import java.util.List;
 
 @GVK(group = "weread.pplay.fun",
     version = "v1alpha1",
-    kind = "bookshelf",
+    kind = "Bookshelf",
     plural = "bookshelfs",
     singular = "bookshelf"
 )
@@ -20,7 +20,7 @@ public class Bookshelf extends AbstractExtension {
 
     @Data
     public static class BookShelfSpec {
-        @Schema(description = "书籍数量（包含导入书籍）")
+        @Schema(description = "书籍数量（包含导入书籍/有声书）")
         private int pureBookCount;
         @Schema(description = "书籍数量")
         private int bookCount;

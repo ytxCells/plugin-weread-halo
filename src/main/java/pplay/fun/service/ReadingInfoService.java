@@ -3,6 +3,6 @@ package pplay.fun.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.reactivestreams.Publisher;
 
-public interface ReviewService {
-    Publisher<? extends Void> save(JsonNode review);
+public interface ReadingInfoService {
+    Publisher<? extends Void> save(JsonNode progressItem);
 }

@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pplay.fun.model.Bookmark;
-import pplay.fun.service.BookmarkService;
+import pplay.fun.model.ReadingInfo;
+import pplay.fun.service.ReadingInfoService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.User;
 import run.halo.app.extension.Metadata;
@@ -16,41 +16,43 @@ import run.halo.app.extension.ReactiveExtensionClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookmarkServiceImpl implements BookmarkService {
+public class ReadingInfoServiceImpl implements ReadingInfoService {
     private final ReactiveExtensionClient client;
 
     @Override
-    public Publisher<? extends Void> save(JsonNode bookmarkJsonNode) {
+    public Publisher<? extends Void> save(JsonNode progressItem) {
         return getContextUser().flatMap(user -> {
             String userName = user.getMetadata().getName();
-            String bookmarkId = bookmarkJsonNode.path("bookmarkId").asText(); // 使用path避免空指针
-            String name = userName + bookmarkId; // 构建唯一名称
+            String bookId = progressItem.path("bookId").asText(); // 使用path避免空指针
+            String name = userName + bookId; // 构建唯一名称
 
-            return client.fetch(Bookmark.class, name)
-                .flatMap(bookmark -> {
+            return client.fetch(ReadingInfo.class, name)
+                .flatMap(readingInfo -> {
                     log.info("更新阅读信息: {}", name);
-                    return updateBookmark(bookmark, bookmarkJsonNode);
+                    return updateReadingInfo(readingInfo, progressItem);
                 })
                 .switchIfEmpty(Mono.defer(() -> {
                     log.info("创建阅读信息: {}", name);
-                    return createBookmark(name, bookmarkJsonNode);
+                    return createReadingInfo(name, progressItem);
                 }));
         }).then();
     }
-    private Mono<Bookmark> createBookmark(String name, JsonNode progressItem) {
-        Bookmark Bookmark = new Bookmark();
+
+    private Mono<ReadingInfo> createReadingInfo(String name, JsonNode progressItem) {
+        ReadingInfo readingInfo = new ReadingInfo();
         Metadata metadata = new Metadata();
         metadata.setName(name);
-        Bookmark.setMetadata(metadata);
-        Bookmark.populateSpecFromJson(progressItem);
-        return client.create(Bookmark);
+        readingInfo.setMetadata(metadata);
+        readingInfo.populateSpecFromJson(progressItem);
+        return client.create(readingInfo);
     }
 
-    private Mono<Bookmark> updateBookmark(Bookmark Bookmark, JsonNode progressItem) {
+    private Mono<ReadingInfo> updateReadingInfo(ReadingInfo readingInfo, JsonNode progressItem) {
         // 更新spec数据
-        Bookmark.populateSpecFromJson(progressItem);
-        return client.update(Bookmark);
+        readingInfo.populateSpecFromJson(progressItem);
+        return client.update(readingInfo);
     }
+
     protected Mono<User> getContextUser() {
         return ReactiveSecurityContextHolder.getContext()
             .doOnNext(ctx -> log.debug("安全上下文: {}", ctx != null ? "存在" : "空"))

@@ -315,7 +315,6 @@ public class WeReadApiClient {
         if (statusCode == 401) {
             throw new Exception("Unauthorized access (HTTP 401)");
         }
-
         return result;
     }
 

@@ -3,13 +3,11 @@ package pplay.fun.service.Impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.reactivestreams.Publisher;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pplay.fun.model.Bookshelf;
-import pplay.fun.service.BookshelfService;
-import pplay.fun.util.UserUtils;
+import pplay.fun.model.Book;
+import pplay.fun.service.BookService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.User;
 import run.halo.app.extension.Metadata;
@@ -18,39 +16,39 @@ import run.halo.app.extension.ReactiveExtensionClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookshelfServiceImpl implements BookshelfService {
+public class BookServiceImpl implements BookService {
     private final ReactiveExtensionClient client;
-
     @Override
-    public Mono<Void> save(JsonNode jsonNode) {
-        return getContextUser()
-            .flatMap(user -> {
-                String userName = user.getMetadata().getName();
-                return client.fetch(Bookshelf.class, userName)
-                    .flatMap(existing -> {
-                        log.info("更新用户书架: {}", userName);
-                        return updateBookShelf(existing, jsonNode);
+    public Publisher<? extends Void> save(JsonNode bookNode) {
+        return getContextUser().flatMap(user -> {
+            String userName = user.getMetadata().getName();
+            String bookId = bookNode.get("bookId").asText();
+            String name = userName+bookId;
+                return client.fetch(Book.class, name)
+                    .flatMap(book -> {
+                        log.info("更新书本: {}", name);
+                        return updateBook(book, bookNode);
                     })
                     .switchIfEmpty(Mono.defer(() -> {
-                        log.info("创建用户书架: {}", userName);
-                        return createBookShelf(userName, jsonNode);
+                        log.info("创建书本: {}", name);
+                        return createBook(name, bookNode);
                     }));
             })
-            .then(); // 转换为 Mono<Void>
+            .then();
     }
 
-    private Mono<Bookshelf> createBookShelf(String name, JsonNode jsonNode) {
-        Bookshelf bookShelf = new Bookshelf();
+    private Mono<Book> createBook(String name, JsonNode bookNode) {
+        Book book = new Book();
         Metadata metadata = new Metadata();
         metadata.setName(name);
-        bookShelf.setMetadata(metadata);
-        bookShelf.populateSpecFromJson(jsonNode);
-        return client.create(bookShelf);
+        book.setMetadata(metadata);
+        book.populateSpecFromJson(bookNode);
+        return client.create(book);
     }
 
-    private Mono<Bookshelf> updateBookShelf(Bookshelf bookShelf, JsonNode jsonNode) {
-        bookShelf.populateSpecFromJson(jsonNode);
-        return client.update(bookShelf);
+    private Mono<Book> updateBook(Book book, JsonNode bookNode) {
+        book.populateSpecFromJson(bookNode);
+        return client.update(book);
     }
 
     protected Mono<User> getContextUser() {
