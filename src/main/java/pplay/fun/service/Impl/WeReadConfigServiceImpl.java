@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pplay.fun.component.WeReadApiClient;
-import pplay.fun.model.WeReadConfig;
+import pplay.fun.extension.WeReadConfig;
 import pplay.fun.service.WeReadConfigService;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Metadata;

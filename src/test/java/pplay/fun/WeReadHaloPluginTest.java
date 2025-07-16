@@ -8,6 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import run.halo.app.plugin.PluginContext;
 
 @ExtendWith(MockitoExtension.class)
-class WereadHaloPluginTest {
+class WeReadHaloPluginTest {
 
 }

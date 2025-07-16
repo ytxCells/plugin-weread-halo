@@ -2,15 +2,14 @@ package pplay.fun;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pplay.fun.model.Book;
-import pplay.fun.model.BookInfo;
-import pplay.fun.model.Bookmark;
-import pplay.fun.model.Bookshelf;
-import pplay.fun.model.ChapterInfo;
-import pplay.fun.model.NoteBook;
-import pplay.fun.model.Review;
-import pplay.fun.model.WeReadConfig;
-import pplay.fun.model.ReadingInfo;
+import pplay.fun.extension.Book;
+import pplay.fun.extension.BookInfo;
+import pplay.fun.extension.Bookmark;
+import pplay.fun.extension.ChapterInfo;
+import pplay.fun.extension.NoteBook;
+import pplay.fun.extension.Review;
+import pplay.fun.extension.WeReadConfig;
+import pplay.fun.extension.ReadingInfo;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
 import run.halo.app.plugin.PluginContext;
@@ -24,12 +23,12 @@ import run.halo.app.plugin.PluginContext;
  * @since 1.0.0
  */
 @Component
-public class WereadHaloPlugin extends BasePlugin {
+public class WeReadHaloPlugin extends BasePlugin {
 
     @Autowired
     private SchemeManager schemeManager;
 
-    public WereadHaloPlugin(PluginContext pluginContext) {
+    public WeReadHaloPlugin(PluginContext pluginContext) {
         super(pluginContext);
     }
 

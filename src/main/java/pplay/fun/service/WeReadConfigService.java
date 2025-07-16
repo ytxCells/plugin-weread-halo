@@ -1,6 +1,6 @@
 package pplay.fun.service;
 
-import pplay.fun.model.WeReadConfig;
+import pplay.fun.extension.WeReadConfig;
 import reactor.core.publisher.Mono;
 
 public interface WeReadConfigService {

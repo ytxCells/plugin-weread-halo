@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pplay.fun.model.Book;
+import pplay.fun.extension.Book;
 import pplay.fun.service.BookService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.User;

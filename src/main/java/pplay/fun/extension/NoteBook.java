@@ -1,4 +1,4 @@
-package pplay.fun.model;
+package pplay.fun.extension;
 
 import lombok.Data;
 import run.halo.app.extension.AbstractExtension;
