@@ -1,0 +1,110 @@
+/* 添加容器样式 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 每页数量选择器 */
+.page-size-selector {
+  margin-bottom: 20px;
+  text-align: right;
+}
+
+.page-size-selector span {
+  margin-right: 10px;
+}
+
+.page-size-selector select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.page-link {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #3498db;
+  transition: all 0.3s;
+}
+
+.page-link:hover {
+  background-color: #f5f7fa;
+  border-color: #3498db;
+}
+
+.page-link.current {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.page-link.prev, .page-link.next {
+  min-width: 80px;
+  text-align: center;
+}
+
+/* 保持原有书籍卡片样式 */
+.book-shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 15px;
+}
+
+.book-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-5px);
+}
+
+.book-cover {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+.book-info {
+  padding: 10px;
+  text-align: center;
+}
+
+.book-title {
+  font-size: 0.9rem;
+  margin: 5px 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.book-author {
+  color: #666;
+  font-size: 0.8rem;
+  margin: 0;
+}

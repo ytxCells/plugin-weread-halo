@@ -1,4 +1,4 @@
-package pplay.fun.service.Impl;
+package pplay.fun.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pplay.fun.extension.Book;
-import pplay.fun.service.BookService;
+import pplay.fun.extension.Review;
+import pplay.fun.service.ReviewService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.User;
 import run.halo.app.extension.Metadata;
@@ -16,39 +16,41 @@ import run.halo.app.extension.ReactiveExtensionClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookServiceImpl implements BookService {
+public class ReviewServiceImpl implements ReviewService {
     private final ReactiveExtensionClient client;
+
     @Override
-    public Publisher<? extends Void> save(JsonNode bookNode) {
+    public Publisher<? extends Void> save(JsonNode jsonNode) {
         return getContextUser().flatMap(user -> {
             String userName = user.getMetadata().getName();
-            String bookId = bookNode.get("bookId").asText();
-            String name = userName+bookId;
-                return client.fetch(Book.class, name)
-                    .flatMap(book -> {
-                        log.info("更新书本: {}", name);
-                        return updateBook(book, bookNode);
-                    })
-                    .switchIfEmpty(Mono.defer(() -> {
-                        log.info("创建书本: {}", name);
-                        return createBook(name, bookNode);
-                    }));
-            })
-            .then();
+            String reviewId = jsonNode.path("reviewId").asText(); // 使用path避免空指针
+            String name = userName + reviewId; // 构建唯一名称
+            JsonNode reviewNode = jsonNode.get("review");
+            return client.fetch(Review.class, name)
+                .flatMap(review -> {
+                    log.info("更新阅读信息: {}", name);
+                    return updateReview(review, reviewNode);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.info("创建阅读信息: {}", name);
+                    return createReview(name, reviewNode);
+                }));
+        }).then();
     }
 
-    private Mono<Book> createBook(String name, JsonNode bookNode) {
-        Book book = new Book();
+    private Mono<Review> createReview(String name, JsonNode jsonNode) {
+        Review Review = new Review();
         Metadata metadata = new Metadata();
         metadata.setName(name);
-        book.setMetadata(metadata);
-        book.populateSpecFromJson(bookNode);
-        return client.create(book);
+        Review.setMetadata(metadata);
+        Review.populateSpecFromJson(jsonNode);
+        return client.create(Review);
     }
 
-    private Mono<Book> updateBook(Book book, JsonNode bookNode) {
-        book.populateSpecFromJson(bookNode);
-        return client.update(book);
+    private Mono<Review> updateReview(Review Review, JsonNode jsonNode) {
+        // 更新spec数据
+        Review.populateSpecFromJson(jsonNode);
+        return client.update(Review);
     }
 
     protected Mono<User> getContextUser() {

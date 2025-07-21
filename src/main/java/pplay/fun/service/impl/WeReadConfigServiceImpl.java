@@ -1,4 +1,4 @@
-package pplay.fun.service.Impl;
+package pplay.fun.service.impl;
 
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;

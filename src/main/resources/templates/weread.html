@@ -2,22 +2,131 @@
 <html lang="zh-CN" xmlns:th="https://www.thymeleaf.org" th:with="version = '1.2.2'">
 
 <head>
-    <title th:text="123"></title>
+    <title th:text="${title} + ' ｜ 我的书架'"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/plugins/plugin-weread/assets/static/css/weread.css}"/>
+    <style>
+        /* 添加分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
 
+        .page-item {
+            margin: 0 5px;
+            padding: 5px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .page-item.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .page-item.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 
 <body>
-<header>
+<header></header>
 
-</header>
-<main>
-    <div>
-       hello word
+<main class="container">
+    <h1>我的书架</h1>
+
+    <!-- 1. 获取当前页码和分页数据 -->
+    <div th:with="currentPage=${not #lists.isEmpty(param.page) ? #numbers.createInteger(param.page[0]) : 1},
+     pageSize=20,
+                  bookPage=${weReadBookFinder.list(currentPage, pageSize)}">
+
+        <!-- 书架网格 -->
+        <div class="book-shelf">
+            <div th:each="book : ${bookPage.items}"
+                 class="book-card">
+                <img th:src="${book.cover}" alt="书籍封面" class="book-cover">
+                <div class="book-info">
+                    <h3 class="book-title" th:text="${book.title}">书名</h3>
+                    <p class="book-author" th:text="${book.author}">作者</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 分页导航 -->
+        <div class="pagination">
+            <!-- 上一页按钮 -->
+            <div class="page-item"
+                 th:class="${currentPage == 1} ? 'disabled' : ''"
+                 th:if="${currentPage > 1}">
+                <a th:href="@{${request.requestURI}(page=${currentPage - 1})}">上一页</a>
+            </div>
+
+            <!-- 页码按钮 -->
+            <div th:each="page : ${#numbers.sequence(1, bookPage.totalPages)}"
+                 class="page-item"
+                 th:class="${currentPage == page} ? 'active' : ''">
+                <a th:href="@{${request.requestURI}(page=${page})}" th:text="${page}"></a>
+            </div>
+
+            <!-- 下一页按钮 -->
+            <div class="page-item"
+                 th:class="${currentPage == bookPage.totalPages} ? 'disabled' : ''"
+                 th:if="${currentPage < bookPage.totalPages}">
+                <a th:href="@{${request.requestURI}(page=${currentPage + 1})}">下一页</a>
+            </div>
+        </div>
+
+        <!-- 3. 显示分页信息 -->
+        <div class="pagination-info">
+            显示第 <span th:text="${(currentPage - 1) * pageSize + 1}"></span> 至
+            <span th:text="${currentPage * pageSize > bookPage.total ? bookPage.total : currentPage * pageSize}"></span>
+            条，
+            共 <span th:text="${bookPage.total}"></span> 条记录
+        </div>
     </div>
-
 </main>
 
+<script>
+    // 可选：AJAX分页示例
+    function loadPage(page) {
+        fetch(`?page=${page}`)
+                .then(response => response.text())
+                .then(html => {
+                    // 使用DOMParser解析新内容
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // 更新书籍列表
+                    document.querySelector('.book-shelf').innerHTML =
+                            doc.querySelector('.book-shelf').innerHTML;
+
+                    // 更新分页控件
+                    document.querySelector('.pagination').innerHTML =
+                            doc.querySelector('.pagination').innerHTML;
+
+                    // 更新分页信息
+                    document.querySelector('.pagination-info').innerHTML =
+                            doc.querySelector('.pagination-info').innerHTML;
+
+                    // 更新URL（不刷新页面）
+                    history.pushState(null, null, `?page=${page}`);
+                });
+    }
+
+    // 监听分页按钮点击（可选）
+    document.querySelector('.pagination').addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') {
+            e.preventDefault();
+            const page = new URL(e.target.href).searchParams.get('page');
+            loadPage(page);
+        }
+    });
+</script>
 
 </body>
-
 </html>

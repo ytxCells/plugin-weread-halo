@@ -1,4 +1,4 @@
-package pplay.fun.service.Impl;
+package pplay.fun.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.Resource;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
