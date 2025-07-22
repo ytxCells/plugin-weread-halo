@@ -108,3 +108,28 @@
   font-size: 0.8rem;
   margin: 0;
 }
+/* 添加分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.page-item {
+  margin: 0 5px;
+  padding: 5px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-item.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.page-item.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}

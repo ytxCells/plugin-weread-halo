@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>划线片段</title>
+    <style>
+        /* 划线卡片样式 */
+        .bookmark-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .bookmark-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            border-left: 4px solid #3498db;
+        }
+
+        .bookmark-content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .bookmark-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .bookmark-book {
+            font-weight: bold;
+        }
+
+        .bookmark-time {
+            color: #888;
+        }
+
+        .no-bookmarks {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+<!-- 划线片段 -->
+<div th:fragment="bookmark">
+    <h1>划线</h1>
+    <div class="bookmark-content">
+        <!-- 1. 获取当前页码和分页数据 -->
+        <div th:with="currentPage=${not #lists.isEmpty(param.page) ? #numbers.createInteger(param.page[0]) : 1},
+                      pageSize=10,
+                      bookmarkPage=${weReadBookmarkFinder.list(currentPage, pageSize)}">
+
+            <!-- 划线列表 -->
+            <div th:if="${bookmarkPage.total > 0}">
+                <div class="bookmark-container">
+                    <div th:each="bookmark : ${bookmarkPage.items}" class="bookmark-card">
+                        <div class="bookmark-content" th:text="${bookmark.spec.markText}"></div>
+                        <div class="bookmark-meta">
+                            <div>
+                                <span class="bookmark-book" th:text="${bookmark.spec.bookId}"></span>
+                                <span th:if="${bookmark.spec.chapterUid != null}"
+                                      th:text="' · 章节 ' + ${bookmark.spec.chapterUid}"></span>
+                            </div>
+                            <div class="bookmark-time"
+                                 th:text="${bookmark.spec.createTime} ?: '未知时间'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 分页导航 -->
+                <div class="pagination bookmark-pagination">
+                    <!-- 上一页按钮 -->
+                    <div class="page-item"
+                         th:class="${currentPage == 1} ? 'disabled' : ''"
+                         th:if="${currentPage > 1}">
+                        <a th:href="@{${request.requestURI}(page=${currentPage - 1})}">上一页</a>
+                    </div>
+
+                    <!-- 页码按钮 -->
+                    <div th:each="page : ${#numbers.sequence(1, bookmarkPage.totalPages)}"
+                         class="page-item"
+                         th:class="${currentPage == page} ? 'active' : ''">
+                        <a th:href="@{${request.requestURI}(page=${page})}" th:text="${page}"></a>
+                    </div>
+
+                    <!-- 下一页按钮 -->
+                    <div class="page-item"
+                         th:class="${currentPage == bookmarkPage.totalPages} ? 'disabled' : ''"
+                         th:if="${currentPage < bookmarkPage.totalPages}">
+                        <a th:href="@{${request.requestURI}(page=${currentPage + 1})}">下一页</a>
+                    </div>
+                </div>
+
+                <!-- 3. 显示分页信息 -->
+                <div class="pagination-info">
+                    显示第 <span th:text="${(currentPage - 1) * pageSize + 1}"></span> 至
+                    <span th:text="${currentPage * pageSize > bookmarkPage.total ? bookmarkPage.total : currentPage * pageSize}"></span>
+                    条，
+                    共 <span th:text="${bookmarkPage.total}"></span> 条记录
+                </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div th:unless="${bookmarkPage.total > 0}" class="no-bookmarks">
+                <p>暂无划线内容</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<!-- 书架片段 -->
+<div th:fragment="bookshelf">
+    <h1>书架</h1>
+    <div class="bookshelf-content">
+        <!-- 1. 获取当前页码和分页数据 -->
+        <div th:with="currentPage=${not #lists.isEmpty(param.page) ? #numbers.createInteger(param.page[0]) : 1},
+                          pageSize=10,
+                          bookPage=${weReadBookFinder.list(currentPage, pageSize)}">
+
+            <!-- 书架网格 -->
+            <div class="book-shelf">
+                <div th:each="book : ${bookPage.items}" class="book-card">
+                    <img th:src="${book.cover}" alt="书籍封面" class="book-cover">
+                    <div class="book-info">
+                        <h3 class="book-title" th:text="${book.title}">书名</h3>
+                        <p class="book-author" th:text="${book.author}">作者</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 分页导航 -->
+            <div class="pagination bookshelf-pagination">
+                <!-- 上一页按钮 -->
+                <div class="page-item"
+                     th:class="${currentPage == 1} ? 'disabled' : ''"
+                     th:if="${currentPage > 1}">
+                    <a th:href="@{${request.requestURI}(page=${currentPage - 1})}">上一页</a>
+                </div>
+
+                <!-- 页码按钮 -->
+                <div th:each="page : ${#numbers.sequence(1, bookPage.totalPages)}"
+                     class="page-item"
+                     th:class="${currentPage == page} ? 'active' : ''">
+                    <a th:href="@{${request.requestURI}(page=${page})}" th:text="${page}"></a>
+                </div>
+
+                <!-- 下一页按钮 -->
+                <div class="page-item"
+                     th:class="${currentPage == bookPage.totalPages} ? 'disabled' : ''"
+                     th:if="${currentPage < bookPage.totalPages}">
+                    <a th:href="@{${request.requestURI}(page=${currentPage + 1})}">下一页</a>
+                </div>
+            </div>
+
+            <!-- 3. 显示分页信息 -->
+            <div class="pagination-info">
+                显示第 <span th:text="${(currentPage - 1) * pageSize + 1}"></span> 至
+                <span th:text="${currentPage * pageSize > bookPage.total ? bookPage.total : currentPage * pageSize}"></span>
+                条，
+                共 <span th:text="${bookPage.total}"></span> 条记录
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
