@@ -1,11 +1,11 @@
-/* 添加容器样式 */
+/* 容器样式 */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-/* 每页数量选择器 */
+/* 每页数量选择器（保留，需确认 HTML 是否使用） */
 .page-size-selector {
   margin-bottom: 20px;
   text-align: right;
@@ -23,13 +23,17 @@
   cursor: pointer;
 }
 
-/* 分页样式 */
+/* 分页导航 */
 .pagination {
   display: flex;
   justify-content: center;
   margin: 30px 0;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.page-item {
+  margin: 0 5px;
 }
 
 .page-link {
@@ -47,10 +51,16 @@
   border-color: #3498db;
 }
 
-.page-link.current {
+.page-item.active .page-link {
   background-color: #3498db;
   color: white;
   border-color: #3498db;
+}
+
+.page-item.disabled .page-link {
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .page-link.prev, .page-link.next {
@@ -58,7 +68,15 @@
   text-align: center;
 }
 
-/* 保持原有书籍卡片样式 */
+/* 分页信息 */
+.pagination-info {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #6c757d;
+  text-align: center;
+}
+
+/* 书籍卡片 */
 .book-shelf {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -107,29 +125,4 @@
   color: #666;
   font-size: 0.8rem;
   margin: 0;
-}
-/* 添加分页样式 */
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
-}
-
-.page-item {
-  margin: 0 5px;
-  padding: 5px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.page-item.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.page-item.disabled {
-  color: #ccc;
-  cursor: not-allowed;
 }

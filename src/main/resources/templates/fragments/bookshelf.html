@@ -1,59 +1,44 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" th:with="version = '1.2.2'">
 <body>
-<!-- 书架片段 -->
-<div th:fragment="bookshelf">
+<th:block th:fragment="bookshelf(books, currentPage, totalPages, pageSize, totalItems)">
     <h1>书架</h1>
     <div class="bookshelf-content">
-        <!-- 1. 获取当前页码和分页数据 -->
-        <div th:with="currentPage=${not #lists.isEmpty(param.page) ? #numbers.createInteger(param.page[0]) : 1},
-                          pageSize=10,
-                          bookPage=${weReadBookFinder.list(currentPage, pageSize)}">
-
-            <!-- 书架网格 -->
-            <div class="book-shelf">
-                <div th:each="book : ${bookPage.items}" class="book-card">
-                    <img th:src="${book.cover}" alt="书籍封面" class="book-cover">
+        <div th:if="${books == null or books.isEmpty()}">
+            <p>暂无书籍</p>
+        </div>
+        <div th:unless="${books == null or books.isEmpty()}">
+            <div class="book-shelf row">
+                <div th:each="book : ${books}" class="book-card col-md-3">
+                    <img th:src="${book.cover != null ? book.cover : '/plugins/plugin-weread/assets/static/images/default-cover.jpg'}" alt="书籍封面" class="book-cover img-fluid"/>
                     <div class="book-info">
-                        <h3 class="book-title" th:text="${book.title}">书名</h3>
-                        <p class="book-author" th:text="${book.author}">作者</p>
+                        <h3 class="book-title" th:text="${book.title != null ? book.title : '未知标题'}">书名</h3>
+                        <p class="book-author" th:text="${book.author != null ? book.author : '未知作者'}">作者</p>
                     </div>
                 </div>
             </div>
+            <!-- 分页导航 -->
+            <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 1 and totalItems != null and totalItems > 0}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == null or currentPage <= 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${currentPage != null ? currentPage - 1 : 1}, size=${pageSize != null ? pageSize : 10})}" th:text="上一页"></a>
+                    </li>
 
-            <!-- 2. 分页导航 -->
-            <div class="pagination bookshelf-pagination">
-                <!-- 上一页按钮 -->
-                <div class="page-item"
-                     th:class="${currentPage == 1} ? 'disabled' : ''"
-                     th:if="${currentPage > 1}">
-                    <a th:href="@{${request.requestURI}(page=${currentPage - 1})}">上一页</a>
-                </div>
-
-                <!-- 页码按钮 -->
-                <div th:each="page : ${#numbers.sequence(1, bookPage.totalPages)}"
-                     class="page-item"
-                     th:class="${currentPage == page} ? 'active' : ''">
-                    <a th:href="@{${request.requestURI}(page=${page})}" th:text="${page}"></a>
-                </div>
-
-                <!-- 下一页按钮 -->
-                <div class="page-item"
-                     th:class="${currentPage == bookPage.totalPages} ? 'disabled' : ''"
-                     th:if="${currentPage < bookPage.totalPages}">
-                    <a th:href="@{${request.requestURI}(page=${currentPage + 1})}">下一页</a>
-                </div>
-            </div>
-
-            <!-- 3. 显示分页信息 -->
-            <div class="pagination-info">
-                显示第 <span th:text="${(currentPage - 1) * pageSize + 1}"></span> 至
-                <span th:text="${currentPage * pageSize > bookPage.total ? bookPage.total : currentPage * pageSize}"></span>
-                条，
-                共 <span th:text="${bookPage.total}"></span> 条记录
-            </div>
+                    <!-- 使用 th:with 提前计算起始和结束页码 -->
+                    <th:block th:with="startPage=${currentPage != null and totalPages != null ? (currentPage - 5 > 1 ? currentPage - 5 : 1) : 1},
+                                       endPage=${currentPage != null and totalPages != null ? (currentPage + 5 < totalPages ? currentPage + 5 : totalPages) : 1}">
+                        <li class="page-item" th:each="page : ${#numbers.sequence(startPage, endPage)}"
+                            th:classappend="${currentPage != null and currentPage == page} ? 'active'">
+                            <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${page}, size=${pageSize != null ? pageSize : 10})}" th:text="${page}"></a>
+                        </li>
+                    </th:block>
+                    <li class="page-item" th:classappend="${currentPage == null or totalPages == null or currentPage >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${currentPage != null ? currentPage + 1 : 2}, size=${pageSize != null ? pageSize : 10})}" th:text="下一页"></a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
-</div>
+</th:block>
 </body>
 </html>

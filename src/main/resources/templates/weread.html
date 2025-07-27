@@ -1,66 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="https://www.thymeleaf.org" th:with="version = '1.2.2'">
-
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" th:with="version = '1.2.2', lang='zh_CN'">
 <head>
+    <meta charset="UTF-8"/>
     <title th:text="${title} + ' ｜ 我的书架'"></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" th:href="@{/plugins/plugin-weread/assets/static/css/weread.css}"/>
 </head>
-
 <body>
 <header></header>
-
 <main class="container">
-    <!-- 引入书架片段 -->
-    <div th:replace="fragments/bookshelf :: bookshelf"></div>
+    <!-- 书架片段 -->
+    <div th:replace="~{plugin:plugin-weread:fragments/bookshelf :: bookshelf(books = ${books}, currentPage = ${currentPage}, totalPages = ${totalPages}, pageSize = ${pageSize}, totalItems = ${totalItems})}"></div>
     <div>
-        <h1>
-            笔记
-        </h1>
+        <h1>笔记</h1>
     </div>
-    <!-- 引入划线片段 -->
-<!--    <div th:replace="fragments/bookmark :: bookmark"></div>-->
-
-
-
 </main>
-
-<script>
-    function loadPage(page, targetSelector) {
-        fetch(`?page=${page}`)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-
-                    // 更新指定区域
-                    const newContent = doc.querySelector(targetSelector);
-                    if (newContent) {
-                        document.querySelector(targetSelector).innerHTML = newContent.innerHTML;
-                    }
-
-                    // 更新URL
-                    history.pushState(null, null, `?page=${page}`);
-                });
-    }
-
-    // 分页事件绑定
-    document.addEventListener('DOMContentLoaded', function () {
-        // 书架分页
-        const bookshelfPagination = document.querySelector('.bookshelf-pagination');
-        if (bookshelfPagination) {
-            bookshelfPagination.addEventListener('click', function (e) {
-                if (e.target.tagName === 'A') {
-                    e.preventDefault();
-                    const page = new URL(e.target.href).searchParams.get('page');
-                    loadPage(page, '.bookshelf-content');
-                }
-            });
-        }
-
-        // 其他区域的分页可类似实现
-    });
-</script>
-
 </body>
 </html>
