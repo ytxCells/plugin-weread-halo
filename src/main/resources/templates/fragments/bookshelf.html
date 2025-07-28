@@ -19,11 +19,10 @@
             </div>
             <!-- 分页导航 -->
             <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 1 and totalItems != null and totalItems > 0}">
-                <ul class="pagination justify-content-center">
+                <ul style="list-style-type: none;" class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${currentPage == null or currentPage <= 1} ? 'disabled'">
                         <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${currentPage != null ? currentPage - 1 : 1}, size=${pageSize != null ? pageSize : 10})}" th:text="上一页"></a>
                     </li>
-
                     <!-- 使用 th:with 提前计算起始和结束页码 -->
                     <th:block th:with="startPage=${currentPage != null and totalPages != null ? (currentPage - 5 > 1 ? currentPage - 5 : 1) : 1},
                                        endPage=${currentPage != null and totalPages != null ? (currentPage + 5 < totalPages ? currentPage + 5 : totalPages) : 1}">

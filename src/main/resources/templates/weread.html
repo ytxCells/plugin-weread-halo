@@ -10,9 +10,6 @@
 <main class="container">
     <!-- 书架片段 -->
     <div th:replace="~{plugin:plugin-weread:fragments/bookshelf :: bookshelf(books = ${books}, currentPage = ${currentPage}, totalPages = ${totalPages}, pageSize = ${pageSize}, totalItems = ${totalItems})}"></div>
-    <div>
-        <h1>笔记</h1>
-    </div>
 </main>
 </body>
 </html>
