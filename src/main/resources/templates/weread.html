@@ -6,10 +6,30 @@
     <link rel="stylesheet" th:href="@{/plugins/plugin-weread/assets/static/css/weread.css}"/>
 </head>
 <body>
-<header></header>
-<main class="container">
-    <!-- 书架片段 -->
-    <div th:replace="~{plugin:plugin-weread:fragments/bookshelf :: bookshelf(books = ${books}, currentPage = ${currentPage}, totalPages = ${totalPages}, pageSize = ${pageSize}, totalItems = ${totalItems})}"></div>
-</main>
+<div class="layui-row">
+    <img alt=""
+         src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb&amp;w=2400"
+         referrerpolicy="same-origin"
+         style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 30vh; max-height: 280px; opacity: 1; object-position: center 50%;">
+</div>
+<div class="container">
+    <!-- 选项卡导航 -->
+    <div class="tab-nav">
+        <a class="tab-link" th:href="@{${#httpServletRequest.requestURI}(type=1)}" data-tab="bookshelf" th:classappend="${type == 1} ? 'active'">书架</a>
+        <a class="tab-link" th:href="@{${#httpServletRequest.requestURI}(type=2)}" data-tab="bookmark" th:classappend="${type == 2} ? 'active'">划线</a>
+        <a class="tab-link" th:href="@{${#httpServletRequest.requestURI}(type=3)}" data-tab="review" th:classappend="${type == 3} ? 'active'">笔记</a>
+    </div>
+    <div th:if="${type == 1}">
+        <div th:replace="~{plugin:plugin-weread:fragments/bookshelf :: bookshelf(books = ${items}, currentPage = ${currentPage}, totalPages = ${totalPages}, pageSize = ${pageSize}, totalItems = ${totalItems})}">
+        </div>
+    </div>
+    <div th:if="${type == 2}">
+        <div th:replace="~{plugin:plugin-weread:fragments/bookmark :: bookmark(items = ${items}, currentPage = ${currentPage}, totalPages = ${totalPages}, pageSize = ${pageSize}, totalItems = ${totalItems})}"></div>
+    </div>
+    <div th:if="${type == 3}">
+        <div th:replace="~{plugin:plugin-weread:fragments/review :: review(items = ${items}, currentPage = ${currentPage}, totalPages = ${totalPages}, pageSize = ${pageSize}, totalItems = ${totalItems})}"></div>
+    </div>
+</div>
+
 </body>
 </html>

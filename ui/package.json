@@ -21,6 +21,7 @@
     "@halo-dev/api-client": "^2.21.0",
     "@halo-dev/components": "^2.21.0",
     "@halo-dev/console-shared": "^2.21.0",
+    "@tanstack/vue-query": "^5.87.1",
     "axios": "^1.7.2",
     "canvas-confetti": "^1.9.3",
     "vue": "^3.5.17"

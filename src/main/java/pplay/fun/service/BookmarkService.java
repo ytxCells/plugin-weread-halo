@@ -14,4 +14,7 @@ public interface BookmarkService {
     Flux<Bookmark> getListAllByBookId(String bookId);
 
     Mono<ListResult<Bookmark.BookmarkSpec>> list(PageRequestImpl of);
+
+    Mono<Void> clearAll();
+
 }

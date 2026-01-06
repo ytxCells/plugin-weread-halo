@@ -8,7 +8,6 @@ import org.reactivestreams.Publisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pplay.fun.extension.Book;
 import pplay.fun.extension.Bookmark;
 import pplay.fun.service.BookmarkService;
 import reactor.core.publisher.Flux;
@@ -84,6 +83,13 @@ public class BookmarkServiceImpl implements BookmarkService {
                     bookSpecs
                 );
             });
+    }
+
+    @Override
+    public Mono<Void> clearAll() {
+        return client.list(Bookmark.class, null, null)
+            .flatMap(client::delete)
+            .then();
     }
 
     private Mono<Bookmark> createBookmark(String name, JsonNode progressItem) {

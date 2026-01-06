@@ -38,6 +38,13 @@ public class ReadingInfoServiceImpl implements ReadingInfoService {
         }).then();
     }
 
+    @Override
+    public Mono<Void> clearAll() {
+        return client.list(ReadingInfo.class, null, null)
+            .flatMap(client::delete)
+            .then();
+    }
+
     private Mono<ReadingInfo> createReadingInfo(String name, JsonNode progressItem) {
         ReadingInfo readingInfo = new ReadingInfo();
         Metadata metadata = new Metadata();

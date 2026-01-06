@@ -11,6 +11,7 @@ import pplay.fun.finders.WeReadBookFinders;
 import pplay.fun.finders.WeReadBookmarkFinders;
 import pplay.fun.finders.WeReadReviewFinders;
 import reactor.core.publisher.Mono;
+import run.halo.app.extension.ListResult;
 import run.halo.app.theme.TemplateNameResolver;
 import java.util.HashMap;
 
@@ -34,50 +35,37 @@ public class WeReadRouter {
         int page = request.queryParam("page").map(Integer::parseInt).orElse(1);
         int size = request.queryParam("size").map(Integer::parseInt).orElse(10);
         int type = request.queryParam("type").map(Integer::parseInt).orElse(1);
-        if (type == 1){
-            return weReadBookFinder.list(page, size)
-                .flatMap(bookPage -> {
-                    var model = new HashMap<String, Object>();
-                    model.put("title", "阅读");
-                    model.put("books", bookPage.getItems());
-                    model.put("currentPage", bookPage.getPage());
-                    // 计算总页数
-                    model.put("totalPages", (int) Math.ceil((double) bookPage.getTotal() / bookPage.getSize()));
-                    model.put("totalItems", bookPage.getTotal());
-                    model.put("pageSize", bookPage.getSize());
-                    return templateNameResolver.resolveTemplateNameOrDefault(request.exchange(), "weread")
-                        .flatMap(templateName -> ServerResponse.ok().render(templateName, model));
-                });
+        Mono<?> dataMono;
+        String title;
+
+        switch (type) {
+            case 2:
+                title = "划线";
+                dataMono = weReadBookmarkFinders.list(page, size);
+                break;
+            case 3:
+                title = "笔记";
+                dataMono = weReadReviewFinders.list(page, size);
+                break;
+            case 1:
+            default:
+                title = "阅读";
+                dataMono = weReadBookFinder.list(page, size);
+                break;
         }
-        if (type == 2){
-            return weReadBookmarkFinders.list(page,size).flatMap(bookPage -> {
-                var model = new HashMap<String, Object>();
-                model.put("title", "划线");
-                model.put("books", bookPage.getItems());
-                model.put("currentPage", bookPage.getPage());
-                // 计算总页数
-                model.put("totalPages", (int) Math.ceil((double) bookPage.getTotal() / bookPage.getSize()));
-                model.put("totalItems", bookPage.getTotal());
-                model.put("pageSize", bookPage.getSize());
-                return templateNameResolver.resolveTemplateNameOrDefault(request.exchange(), "weread")
-                    .flatMap(templateName -> ServerResponse.ok().render(templateName, model));
-            });
-        }
-        if (type ==3){
-            return weReadReviewFinders.list(page,size).flatMap(bookPage -> {
-                var model = new HashMap<String, Object>();
-                model.put("title", "笔记");
-                model.put("books", bookPage.getItems());
-                model.put("currentPage", bookPage.getPage());
-                // 计算总页数
-                model.put("totalPages", (int) Math.ceil((double) bookPage.getTotal() / bookPage.getSize()));
-                model.put("totalItems", bookPage.getTotal());
-                model.put("pageSize", bookPage.getSize());
-                return templateNameResolver.resolveTemplateNameOrDefault(request.exchange(), "weread")
-                    .flatMap(templateName -> ServerResponse.ok().render(templateName, model));
-            });
-        }
-        return null;
+
+        return dataMono.flatMap(bookPage ->{
+            var model = new HashMap<String, Object>();
+            model.put("title", title);
+            model.put("items", ((ListResult<?>) bookPage).getItems());
+            model.put("currentPage", ((ListResult<?>) bookPage).getPage());
+            model.put("totalPages", (int) Math.ceil((double) ((ListResult<?>) bookPage).getTotal() / ((ListResult<?>) bookPage).getSize()));
+            model.put("totalItems", ((ListResult<?>) bookPage).getTotal());
+            model.put("pageSize", ((ListResult<?>) bookPage).getSize());
+            model.put("type",type);
+            return templateNameResolver.resolveTemplateNameOrDefault(request.exchange(), "weread")
+                .flatMap(templateName -> ServerResponse.ok().render(templateName, model));
+        });
 
     }
 }

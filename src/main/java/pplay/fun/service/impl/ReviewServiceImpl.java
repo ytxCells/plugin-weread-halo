@@ -38,6 +38,13 @@ public class ReviewServiceImpl implements ReviewService {
         }).then();
     }
 
+    @Override
+    public Mono<Void> clearAll() {
+        return client.list(Review.class, null, null)
+            .flatMap(client::delete)
+            .then();
+    }
+
     private Mono<Review> createReview(String name, JsonNode jsonNode) {
         Review Review = new Review();
         Metadata metadata = new Metadata();

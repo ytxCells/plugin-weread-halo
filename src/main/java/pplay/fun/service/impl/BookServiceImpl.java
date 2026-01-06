@@ -8,6 +8,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pplay.fun.extension.Book;
 import pplay.fun.service.BookService;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.User;
 import run.halo.app.extension.Metadata;
@@ -34,6 +35,13 @@ public class BookServiceImpl implements BookService {
                         return createBook(name, bookNode);
                     }));
             })
+            .then();
+    }
+
+    @Override
+    public Mono<Void> clearAll() {
+        return client.list(Book.class, null, null)
+            .flatMap(client::delete)
             .then();
     }
 

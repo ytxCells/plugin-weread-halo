@@ -1,75 +1,50 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>划线片段</title>
-</head>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" th:with="version = '1.2.2'">
 <body>
-<!-- 划线片段 -->
-<div th:fragment="bookmark">
+<th:block th:fragment="bookmark(items, currentPage, totalPages, pageSize, totalItems)">
     <h1>划线</h1>
     <div class="bookmark-content">
-        <!-- 1. 获取当前页码和分页数据 -->
-        <div th:with="currentPage=${not #lists.isEmpty(param.page) ? #numbers.createInteger(param.page[0]) : 1},
-                      pageSize=10,
-                      bookmarkPage=${weReadBookmarkFinder.list(currentPage, pageSize)}">
+        <div th:if="${items == null or items.isEmpty()}">
+            <p>暂无划线</p>
+        </div>
 
-            <!-- 划线列表 -->
-            <div th:if="${bookmarkPage.total > 0}">
-                <div class="bookmark-container">
-                    <div th:each="bookmark : ${bookmarkPage.items}" class="bookmark-card">
-                        <div class="bookmark-content" th:text="${bookmark.spec.markText}"></div>
-                        <div class="bookmark-meta">
-                            <div>
-                                <span class="bookmark-book" th:text="${bookmark.spec.bookId}"></span>
-                                <span th:if="${bookmark.spec.chapterUid != null}"
-                                      th:text="' · 章节 ' + ${bookmark.spec.chapterUid}"></span>
-                            </div>
-                            <div class="bookmark-time"
-                                 th:text="${bookmark.spec.createTime} ?: '未知时间'"></div>
+        <div th:unless="${items == null or items.isEmpty()}">
+            <div class="bookmark-container">
+                <div th:each="bookmark : ${items}" class="bookmark-card">
+                    <div class="bookmark-content" th:text="${bookmark.markText}"></div>
+                    <div class="bookmark-meta">
+                        <div>
+                            <span class="bookmark-book" th:text="${bookmark.bookId}"></span>
+                            <span th:if="${bookmark.chapterUid != null}"
+                                  th:text="' · 章节 ' + ${bookmark.chapterUid}"></span>
                         </div>
+                        <div class="bookmark-time"
+                             th:text="${bookmark.createTime} ?: '未知时间'"></div>
                     </div>
                 </div>
-
-                <!-- 2. 分页导航 -->
-                <div class="pagination bookmark-pagination">
-                    <!-- 上一页按钮 -->
-                    <div class="page-item"
-                         th:class="${currentPage == 1} ? 'disabled' : ''"
-                         th:if="${currentPage > 1}">
-                        <a th:href="@{${request.requestURI}(page=${currentPage - 1})}">上一页</a>
-                    </div>
-
-                    <!-- 页码按钮 -->
-                    <div th:each="page : ${#numbers.sequence(1, bookmarkPage.totalPages)}"
-                         class="page-item"
-                         th:class="${currentPage == page} ? 'active' : ''">
-                        <a th:href="@{${request.requestURI}(page=${page})}" th:text="${page}"></a>
-                    </div>
-
-                    <!-- 下一页按钮 -->
-                    <div class="page-item"
-                         th:class="${currentPage == bookmarkPage.totalPages} ? 'disabled' : ''"
-                         th:if="${currentPage < bookmarkPage.totalPages}">
-                        <a th:href="@{${request.requestURI}(page=${currentPage + 1})}">下一页</a>
-                    </div>
-                </div>
-
-                <!-- 3. 显示分页信息 -->
-                <div class="pagination-info">
-                    显示第 <span th:text="${(currentPage - 1) * pageSize + 1}"></span> 至
-                    <span th:text="${currentPage * pageSize > bookmarkPage.total ? bookmarkPage.total : currentPage * pageSize}"></span>
-                    条，
-                    共 <span th:text="${bookmarkPage.total}"></span> 条记录
-                </div>
-            </div>
-
-            <!-- 空状态 -->
-            <div th:unless="${bookmarkPage.total > 0}" class="no-bookmarks">
-                <p>暂无划线内容</p>
             </div>
         </div>
+        <!-- 分页导航 -->
+        <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 1 and totalItems != null and totalItems > 0}">
+            <ul style="list-style-type: none;" class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == null or currentPage <= 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${currentPage != null ? currentPage - 1 : 1}, size=${pageSize != null ? pageSize : 10},type=2)}" th:text="上一页"></a>
+                </li>
+                <!-- 使用 th:with 提前计算起始和结束页码 -->
+                <th:block th:with="startPage=${currentPage != null and totalPages != null ? (currentPage - 5 > 1 ? currentPage - 5 : 1) : 1},
+                                       endPage=${currentPage != null and totalPages != null ? (currentPage + 5 < totalPages ? currentPage + 5 : totalPages) : 1}">
+                    <li class="page-item" th:each="page : ${#numbers.sequence(startPage, endPage)}"
+                        th:classappend="${currentPage != null and currentPage == page} ? 'active'">
+                        <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${page}, size=${pageSize != null ? pageSize : 10},type=2)}" th:text="${page}"></a>
+                    </li>
+                </th:block>
+                <li class="page-item" th:classappend="${currentPage == null or totalPages == null or currentPage >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${currentPage != null ? currentPage + 1 : 2}, size=${pageSize != null ? pageSize : 10},type=2)}" th:text="下一页"></a>
+                </li>
+            </ul>
+        </nav>
     </div>
-</div>
+
+</th:block>
 </body>
 </html>

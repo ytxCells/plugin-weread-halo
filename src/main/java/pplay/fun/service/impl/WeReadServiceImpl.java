@@ -51,6 +51,25 @@ public class WeReadServiceImpl implements WeReadService {
             });
     }
 
+    @Override
+    public Mono<Void> clearWeRead() {
+        // 清空书籍数据
+        Mono<Void> clearBooks = bookService.clearAll();
+
+        // 清空书签数据
+        Mono<Void> clearBookmarks = bookmarkService.clearAll();
+
+        // 清空笔记数据
+        Mono<Void> clearReviews = reviewService.clearAll();
+
+        // 清空阅读进度数据
+        Mono<Void> clearReadingInfo = progressService.clearAll();
+
+        // 合并所有清空操作
+        return Flux.merge(clearBooks, clearBookmarks, clearReviews, clearReadingInfo)
+            .then();
+    }
+
     private Mono<Void> saveNotebooks(JsonNode notebooksNode) {
         // 1. 获取notebooks数组
         JsonNode notebooksArray = notebooksNode.path("books"); // 使用path避免空指针

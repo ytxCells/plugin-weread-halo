@@ -165,13 +165,13 @@ const refreshCookie = () => {
             复制
           </VButton>
 
-          <VButton
-                  type="primary"
-                  @click="refreshCookie"
-                  class="px-4 py-2 text-sm"
-          >
-            刷新
-          </VButton>
+<!--          <VButton-->
+<!--                  type="primary"-->
+<!--                  @click="refreshCookie"-->
+<!--                  class="px-4 py-2 text-sm"-->
+<!--          >-->
+<!--            刷新-->
+<!--          </VButton>-->
         </div>
       </div>
     </VCard>

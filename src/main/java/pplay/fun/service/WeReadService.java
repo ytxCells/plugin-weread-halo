@@ -7,4 +7,6 @@ public interface WeReadService {
 
     Mono<Void> synchronizationWeRead();
 
+    Mono<Void> clearWeRead();
+
 }

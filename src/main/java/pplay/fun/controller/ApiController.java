@@ -1,6 +1,7 @@
 package pplay.fun.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import pplay.fun.service.WeReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,5 +24,10 @@ public class ApiController {
     @PreAuthorize("isAuthenticated()")
     public Mono<Void> synchronizationWeRead() {
         return weReadService.synchronizationWeRead(); // 传递安全上下文
+    }
+    @DeleteMapping("/clearWeRead")
+    @PreAuthorize("isAuthenticated()")
+    public Mono<Void> clearWeRead() {
+        return weReadService.clearWeRead(); // 传递安全上下文
     }
 }
